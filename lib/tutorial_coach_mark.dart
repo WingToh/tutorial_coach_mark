@@ -44,7 +44,6 @@ export 'package:tutorial_coach_mark/src/util.dart';
 /// - [previous] - Returns to previous target
 /// - [skip] - Skips the tutorial
 /// - [finish] - Ends the tutorial
-
 class TutorialCoachMark {
   final List<TargetFocus> targets;
   final FutureOr<void> Function(TargetFocus)? onClickTarget;
@@ -63,6 +62,7 @@ class TutorialCoachMark {
   final bool useSafeArea;
   final Color colorShadow;
   final double opacityShadow;
+  final GlobalKey<TutorialCoachMarkWidgetState> _widgetKey = GlobalKey();
   final Duration focusAnimationDuration;
   final Duration unFocusAnimationDuration;
   final Duration pulseAnimationDuration;
@@ -72,13 +72,8 @@ class TutorialCoachMark {
   final ImageFilter? imageFilter;
   final String? backgroundSemanticLabel;
   final int initialFocus;
-  final GlobalKey<TutorialCoachMarkWidgetState> _widgetKey = GlobalKey();
-  final bool disableBackButton;
 
   OverlayEntry? _overlayEntry;
-  ModalRoute?
-      _blockBackRoute; // Referencia a la ruta que bloquea el botón "Atrás"
-  BuildContext? _contextTutorial; // Almacena el contexto para usarlo después
 
   TutorialCoachMark({
     required this.targets,
@@ -104,7 +99,6 @@ class TutorialCoachMark {
     this.imageFilter,
     this.initialFocus = 0,
     this.backgroundSemanticLabel,
-    this.disableBackButton = true,
   }) : assert(opacityShadow >= 0 && opacityShadow <= 1);
 
   OverlayEntry _buildOverlay({bool rootOverlay = false}) {
@@ -148,11 +142,12 @@ class TutorialCoachMark {
     });
   }
 
+  // `navigatorKey` needs to be the one that you passed to MaterialApp.navigatorKey
   void showWithNavigatorStateKey({
     required GlobalKey<NavigatorState> navigatorKey,
     bool rootOverlay = false,
   }) {
-    navigatorKey.currentState?.overlay?.let((it) {
+    navigatorKey.currentState?.overlay.let((it) {
       showWithOverlayState(
         overlay: it,
         rootOverlay: rootOverlay,
@@ -164,26 +159,7 @@ class TutorialCoachMark {
     required OverlayState overlay,
     bool rootOverlay = false,
   }) {
-    _contextTutorial = overlay.context; // Guarda el contexto del overlay
-    postFrame(() {
-      _createAndShow(overlay, rootOverlay: rootOverlay);
-      if (disableBackButton) {
-        // Bloquea el botón "Atrás" mientras el tutorial está activo
-        _blockBackRoute = PageRouteBuilder(
-          opaque: false,
-          barrierDismissible: false,
-          pageBuilder: (context, _, __) {
-            return PopScope(
-              canPop: false,
-              onPopInvokedWithResult: (value, result) async =>
-                  false, // Bloquea el retroceso
-              child: const SizedBox(), // No muestra nada
-            );
-          },
-        );
-        Navigator.of(_contextTutorial!).push(_blockBackRoute!);
-      }
-    });
+    postFrame(() => _createAndShow(overlay, rootOverlay: rootOverlay));
   }
 
   void _createAndShow(
@@ -223,23 +199,5 @@ class TutorialCoachMark {
   void _removeOverlay() {
     _overlayEntry?.remove();
     _overlayEntry = null;
-    closeHiddenView();
-  }
-
-  void removeOverlayEntry() {
-    _overlayEntry?.remove();
-    _overlayEntry = null;
-    closeHiddenView();
-  }
-
-  void closeHiddenView() {
-    // Verifica si hay un contexto válido antes de intentar remover la ruta
-    if (_contextTutorial != null &&
-        _contextTutorial!.mounted &&
-        _blockBackRoute != null) {
-      Navigator.of(_contextTutorial!).removeRoute(_blockBackRoute!);
-      _blockBackRoute = null;
-    }
-    _contextTutorial = null;
   }
 }

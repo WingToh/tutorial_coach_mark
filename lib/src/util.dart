@@ -19,15 +19,13 @@ TargetPosition? getTargetCurrent(
 
       BuildContext? context;
       if (rootOverlay) {
-        context =
-            key.currentContext!
-                .findRootAncestorStateOfType<OverlayState>()
-                ?.context;
+        context = key.currentContext!
+            .findRootAncestorStateOfType<OverlayState>()
+            ?.context;
       } else {
-        context =
-            key.currentContext!
-                .findAncestorStateOfType<NavigatorState>()
-                ?.context;
+        context = key.currentContext!
+            .findAncestorStateOfType<NavigatorState>()
+            ?.context;
       }
       Offset offset;
       if (context != null) {
@@ -41,8 +39,7 @@ TargetPosition? getTargetCurrent(
 
       return TargetPosition(size, offset);
     } catch (e) {
-      print("TutorialCoachMark: Cannot find Target: $e");
-      print("TutorialCoachMark: Falling back to target.targetPosition: ${target.targetPosition}");
+      // WING CHANGE ADDED
       return target.targetPosition;
     }
   } else {
@@ -67,7 +64,7 @@ extension StateExt on State {
 
 class NotFoundTargetException extends FormatException {
   NotFoundTargetException(identify)
-    : super('It was not possible to obtain target position ($identify).');
+      : super('It was not possible to obtain target position ($identify).');
 }
 
 void postFrame(VoidCallback callback) {
