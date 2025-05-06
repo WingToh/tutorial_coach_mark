@@ -41,8 +41,8 @@ TargetPosition? getTargetCurrent(
 
       return TargetPosition(size, offset);
     } catch (e) {
-      print("Cannot find Target: $e");
-      print("Falling back to target.targetPosition: ${target.targetPosition}");
+      print("TutorialCoachMark: Cannot find Target: $e");
+      print("TutorialCoachMark: Falling back to target.targetPosition: ${target.targetPosition}");
       return target.targetPosition;
     }
   } else {
